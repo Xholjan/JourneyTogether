@@ -1,5 +1,5 @@
-﻿using Application.Users.Commands.SyncUser;
-using Application.Users.Queries.GetUsers;
+﻿using Application.Users.Commands;
+using Application.Users.Queries;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -18,7 +18,6 @@ namespace Api.Controllers
             _mediator = mediator;
         }
 
-        [Authorize]
         [HttpGet]
         public async Task<IActionResult> Get()
         {

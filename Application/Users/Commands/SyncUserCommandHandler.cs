@@ -1,9 +1,9 @@
-﻿using Application.Users.Interfaces;
+﻿using Application.Interfaces;
 using Application.Users.Models;
 using Domain.Entities;
 using MediatR;
 
-namespace Application.Users.Commands.SyncUser
+namespace Application.Users.Commands
 {
 
     public class SyncUserCommandHandler : IRequestHandler<SyncUserCommand, UserModel>

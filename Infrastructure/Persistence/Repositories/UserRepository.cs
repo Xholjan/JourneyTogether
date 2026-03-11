@@ -1,5 +1,4 @@
-﻿using Application.Users.Interfaces;
-using Application.Users.Models;
+﻿using Application.Interfaces;
 using Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 
@@ -14,18 +13,12 @@ namespace Persistence.Repositories
             _context = context;
         }
 
-        public async Task<List<UserModel>> GetAllUsersAsync(CancellationToken cancellationToken)
+        public async Task<List<User>> GetAllUsersAsync(CancellationToken cancellationToken)
         {
-            return await _context.Users
-                .Select(u => new UserModel
-                {
-                    Id = u.Id,
-                    Email = u.Email
-                })
-                .ToListAsync(cancellationToken);
+            return await _context.Users.ToListAsync(cancellationToken);
         }
 
-        public async Task<User> GetByIdAsync(Guid id, CancellationToken cancellationToken)
+        public async Task<User?> GetByIdAsync(Guid id, CancellationToken cancellationToken)
         {
             return await _context.Users.FirstOrDefaultAsync(u => u.Id == id, cancellationToken);
         }
@@ -39,10 +32,9 @@ namespace Persistence.Repositories
         {
             await _context.SaveChangesAsync(cancellationToken);
         }
-        public async Task<User?> GetByAuth0Id(string auth0Id, CancellationToken ct)
+        public async Task<User?> GetByAuth0Id(string auth0Id, CancellationToken cancellationToken)
         {
-            return await _context.Users
-                .FirstOrDefaultAsync(x => x.Auth0Id == auth0Id, ct);
+            return await _context.Users.FirstOrDefaultAsync(x => x.Auth0Id == auth0Id, cancellationToken);
         }
     }
 }

@@ -1,4 +1,4 @@
-using Application.Users.Interfaces;
+using Application.Interfaces;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
@@ -37,6 +37,8 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 });
 
 builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IJourneyRepository, JourneyRepository>();
+
 builder.Services.AddAuthorization();
 
 var app = builder.Build();

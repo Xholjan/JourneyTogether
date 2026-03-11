@@ -1,8 +1,8 @@
-﻿using Application.Users.Interfaces;
+﻿using Application.Interfaces;
 using Application.Users.Models;
 using MediatR;
 
-namespace Application.Users.Queries.GetCurrentUser
+namespace Application.Users.Queries
 {
     public class GetCurrentUserQueryHandler : IRequestHandler<GetCurrentUserQuery, UserModel>
     {
