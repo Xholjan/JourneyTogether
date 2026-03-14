@@ -23,7 +23,6 @@ namespace Application.Users.Commands
             {
                 user = new User
                 {
-                    Id = Guid.NewGuid(),
                     Auth0Id = request.Auth0Id,
                     Email = request.Email
                 };

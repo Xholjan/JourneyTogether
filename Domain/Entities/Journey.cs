@@ -9,8 +9,9 @@
         public DateTime ArrivalTime { get; set; }
         public TransportType TransportType { get; set; }
         public decimal DistanceKm { get; set; }
-        public Guid UserId { get; set; }
+        public int UserId { get; set; }
         public User User { get; set; } = null!;
+        public bool IsDailyGoalAchieved { get; set; }
     }
 
     public enum TransportType

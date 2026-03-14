@@ -1,6 +1,7 @@
 using Application.Common;
 using Application.Interfaces;
 using Application.Journeys.Commands;
+using Application.Notifications;
 using FluentValidation;
 using MediatR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -12,9 +13,11 @@ using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Controllers
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 
+// Swagger
 builder.Services.AddSwaggerGen(options =>
 {
     options.SwaggerDoc("v1", new OpenApiInfo
@@ -24,32 +27,57 @@ builder.Services.AddSwaggerGen(options =>
     });
 });
 
+// CORS
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowNuxt", policy =>
+    {
+        policy.WithOrigins("http://localhost:3000")
+              .AllowAnyHeader()
+              .AllowAnyMethod()
+              .AllowCredentials();
+    });
+});
+
+// Database
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
+// SignalR
+builder.Services.AddSignalR();
+
+// MediatR
 builder.Services.AddMediatR(cfg =>
 {
     var assembly = Assembly.Load("Application");
     cfg.RegisterServicesFromAssembly(assembly);
 });
 
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-.AddJwtBearer(options =>
+// Auth0 Authentication
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options =>
 {
     options.Authority = "https://dev-0lb0kkcpz1t58aql.us.auth0.com/";
     options.Audience = "https://api.journeytogether.com";
+    options.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
+    {
+        ValidateIssuer = true
+    };
 });
 
+// Repositories
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IJourneyRepository, JourneyRepository>();
 
+// FluentValidation
 builder.Services.AddValidatorsFromAssemblyContaining<CreateJourneyCommandValidator>();
 builder.Services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
 
+// Authorization
 builder.Services.AddAuthorization();
 
 var app = builder.Build();
 
+// Swagger
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -58,9 +86,17 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+// CORS
+app.UseCors("AllowNuxt");
+
+// SignalR
+app.MapHub<NotificationHub>("/hubs/notifications");
+
+// Auth
 app.UseAuthentication();
 app.UseAuthorization();
 
+// Controllers
 app.MapControllers();
 
 app.Run();

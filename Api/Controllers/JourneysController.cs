@@ -3,6 +3,7 @@ using Application.Journeys.Queries;
 using Domain.Entities;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace Api.Controllers
 {
@@ -18,7 +19,7 @@ namespace Api.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create(CreateJourneyCommand command)
+        public async Task<IActionResult> Create([FromBody] CreateJourneyCommand command)
         {
             var id = await _mediator.Send(command);
             return CreatedAtAction(nameof(GetById), new { id }, null);
@@ -35,21 +36,25 @@ namespace Api.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Journey>>> GetPaged([FromQuery] int page = 1, [FromQuery] int pageSize = 20)
         {
-            var journeys = await _mediator.Send(new GetJourneysPagedQuery(page, pageSize));
+            var userId = 2;
+            var journeys = await _mediator.Send(new GetJourneysPagedQuery(userId, page, pageSize));
             return Ok(journeys);
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(int id, UpdateJourneyCommand command)
+        public async Task<IActionResult> Update(int id, [FromBody] UpdateJourneyCommand command)
         {
             if (id != command.Id) return BadRequest();
+
             await _mediator.Send(command);
             return NoContent();
         }
 
         [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(int id, [FromQuery] Guid userId)
+        public async Task<IActionResult> Delete(int id)
         {
+            var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+
             await _mediator.Send(new DeleteJourneyCommand(id, userId));
             return NoContent();
         }

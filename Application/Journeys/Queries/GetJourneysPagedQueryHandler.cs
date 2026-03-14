@@ -12,7 +12,7 @@ namespace Application.Journeys.Queries
 
         public async Task<IEnumerable<Journey>> Handle(GetJourneysPagedQuery request, CancellationToken cancellationToken)
         {
-            var allJourneys = await _repo.GetJourneysAsync(cancellationToken);
+            var allJourneys = await _repo.GetJourneysAsync(request.UserId, cancellationToken);
             return allJourneys.Skip((request.Page - 1) * request.PageSize).Take(request.PageSize);
         }
     }
