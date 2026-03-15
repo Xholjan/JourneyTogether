@@ -4,6 +4,7 @@ using Application.Interfaces.Application.Interfaces;
 using Application.Journeys.Commands;
 using Application.Notifications;
 using FluentValidation;
+using Infrastructure.Persistence.Repositories;
 using Infrastructure.Persistence.Repositories.Persistence.Repositories;
 using MediatR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -70,6 +71,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJw
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IJourneyRepository, JourneyRepository>();
 builder.Services.AddScoped<IShareRepository, ShareRepository>();
+builder.Services.AddScoped<IFavouriteRepository, FavouriteRepository>();
 
 // FluentValidation
 builder.Services.AddValidatorsFromAssemblyContaining<CreateJourneyCommandValidator>();
@@ -93,7 +95,7 @@ app.UseHttpsRedirection();
 app.UseCors("AllowNuxt");
 
 // SignalR
-app.MapHub<NotificationHub>("/hubs/notifications");
+app.MapHub<NotificationHub>("/notifications");
 
 // Auth
 app.UseAuthentication();

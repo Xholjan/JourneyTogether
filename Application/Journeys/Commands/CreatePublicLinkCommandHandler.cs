@@ -14,7 +14,9 @@ namespace Application.Journeys.Commands
 
         public async Task<string> Handle(CreatePublicLinkCommand request, CancellationToken cancellationToken)
         {
-            return await _repo.CreatePublicLinkAsync(request.JourneyId, request.UserId, cancellationToken);
+            var token = await _repo.CreatePublicLinkAsync(request.JourneyId, request.UserId, cancellationToken);
+
+            return $"/public/journey/{token}";
         }
     }
 }

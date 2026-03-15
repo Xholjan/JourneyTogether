@@ -1,6 +1,4 @@
-﻿using Domain.Entities;
-
-namespace Application.Journeys.Models
+﻿namespace Application.Journeys.Models
 {
     public class JourneyModel
     {
@@ -11,7 +9,5 @@ namespace Application.Journeys.Models
         public DateTime ArrivalTime { get; set; }
         public TransportType TransportType { get; set; }
         public decimal DistanceKm { get; set; }
-        public Guid UserId { get; set; }
-        public User User { get; set; } = null!;
     }
 }

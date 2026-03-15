@@ -24,7 +24,7 @@ namespace Application.Journeys.Events
         {
             var journey = notification.Journey;
 
-            var todayJourneys = (await _repo.GetJourneysByUserAsync(journey.UserId, cancellationToken))
+            var todayJourneys = (await _repo.GetJourneysAsync(journey.UserId, cancellationToken))
                 .Where(j => j.StartTime.Date == DateTime.UtcNow.Date)
                 .ToList();
 

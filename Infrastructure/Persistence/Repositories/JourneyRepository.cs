@@ -17,24 +17,6 @@ namespace Persistence.Repositories
             _mediator = mediator;
         }
 
-        public async Task<Journey> AddJourneyAsync(Journey journey, CancellationToken cancellationToken)
-        {
-            _context.Journeys.Add(journey);
-            await _context.SaveChangesAsync(cancellationToken);
-
-            await _mediator.Publish(new JourneyCreated(journey), cancellationToken);
-
-            return journey;
-        }
-
-        public async Task UpdateJourneyAsync(Journey journey, CancellationToken cancellationToken)
-        {
-            _context.Journeys.Update(journey);
-            await _context.SaveChangesAsync(cancellationToken);
-
-            await _mediator.Publish(new JourneyUpdated(journey), cancellationToken);
-        }
-
         public async Task<IEnumerable<Journey>> GetJourneysAsync(int userId, CancellationToken cancellationToken)
         {
             return await _context.Journeys.Where(j => j.UserId == userId).Include(j => j.User).ToListAsync(cancellationToken);
@@ -45,9 +27,20 @@ namespace Persistence.Repositories
             return await _context.Journeys.Include(j => j.User).FirstOrDefaultAsync(j => j.Id == id, cancellationToken);
         }
 
-        public async Task<IEnumerable<Journey>> GetJourneysByUserAsync(int userId, CancellationToken cancellationToken)
+        public async Task AddJourneyAsync(Journey journey, CancellationToken cancellationToken)
         {
-            return await _context.Journeys.Include(j => j.User).Where(j => j.UserId == userId).ToListAsync(cancellationToken);
+            _context.Journeys.Add(journey);
+            await _context.SaveChangesAsync(cancellationToken);
+
+            await _mediator.Publish(new JourneyCreated(journey), cancellationToken);
+        }
+
+        public async Task UpdateJourneyAsync(Journey journey, CancellationToken cancellationToken)
+        {
+            _context.Journeys.Update(journey);
+            await _context.SaveChangesAsync(cancellationToken);
+
+            await _mediator.Publish(new JourneyUpdated(journey), cancellationToken);
         }
 
         public async Task DeleteJourneyAsync(Journey journey, CancellationToken cancellationToken)

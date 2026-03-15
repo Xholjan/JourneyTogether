@@ -4,13 +4,13 @@ using MediatR;
 
 namespace Application.Journeys.Commands
 {
-    public class CreateJourneyCommandHandler : IRequestHandler<CreateJourneyCommand, int>
+    public class CreateJourneyCommandHandler : IRequestHandler<CreateJourneyCommand>
     {
         private readonly IJourneyRepository _repo;
 
         public CreateJourneyCommandHandler(IJourneyRepository repo) => _repo = repo;
 
-        public async Task<int> Handle(CreateJourneyCommand request, CancellationToken cancellationToken)
+        public async Task Handle(CreateJourneyCommand request, CancellationToken cancellationToken)
         {
             var journey = new Journey
             {
@@ -18,13 +18,12 @@ namespace Application.Journeys.Commands
                 StartTime = request.StartTime,
                 ArrivalLocation = request.ArrivalLocation,
                 ArrivalTime = request.ArrivalTime,
-                TransportType = request.TransportType,
+                TransportType = (TransportType)request.TransportType,
                 DistanceKm = request.DistanceKm,
                 UserId = request.UserId
             };
 
-            var created = await _repo.AddJourneyAsync(journey, cancellationToken);
-            return created.Id;
+            await _repo.AddJourneyAsync(journey, cancellationToken);
         }
     }
 }

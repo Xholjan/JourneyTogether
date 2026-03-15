@@ -2,9 +2,9 @@
 
 namespace Application.Journeys.Commands
 {
-    public class DeleteJourneyCommand() : IRequest
+    public class RemoveFavouriteCommand : IRequest
     {
-        public int Id { get; set; }
+        public int JourneyId { get; set; }
         public int UserId { get; set; }
     }
 }

@@ -12,6 +12,7 @@ namespace Persistence
         public DbSet<Share> Shares => Set<Share>();
         public DbSet<PublicLink> PublicLinks => Set<PublicLink>();
         public DbSet<Audit> Audits => Set<Audit>();
+        public DbSet<Favourite> Favourites => Set<Favourite>();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -101,6 +102,22 @@ namespace Persistence
                 .WithMany()
                 .HasForeignKey(a => a.UserId)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Favourite>()
+                .HasOne(f => f.Journey)
+                .WithMany()
+                .HasForeignKey(f => f.JourneyId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Favourite>()
+                .HasOne(f => f.User)
+                .WithMany()
+                .HasForeignKey(f => f.UserId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Favourite>()
+                .HasIndex(f => new { f.JourneyId, f.UserId })
+                .IsUnique();
         }
     }
 }

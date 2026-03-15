@@ -41,7 +41,7 @@ namespace Infrastructure.Persistence.Repositories
                 await _context.SaveChangesAsync(cancellationToken);
             }
 
-            public async Task<string> CreatePublicLinkAsync(int journeyId, int userId, CancellationToken cancellationToken)
+            public async Task<Guid> CreatePublicLinkAsync(int journeyId, int userId, CancellationToken cancellationToken)
             {
                 var token = Guid.NewGuid();
 
@@ -64,8 +64,7 @@ namespace Infrastructure.Persistence.Repositories
                 });
 
                 await _context.SaveChangesAsync(cancellationToken);
-
-                return $"/public/journey/{token}";
+                return token;
             }
         }
     }

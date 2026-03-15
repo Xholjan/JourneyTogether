@@ -1,7 +1,12 @@
-﻿using Domain.Entities;
+﻿using Application.Journeys.Models;
 using MediatR;
 
 namespace Application.Journeys.Queries
 {
-    public record GetJourneysPagedQuery(int UserId, int Page, int PageSize) : IRequest<IEnumerable<Journey>>;
+    public class GetJourneysPagedQuery() : IRequest<IEnumerable<JourneyModel>>
+    {
+        public int UserId { get; set; }
+        public int Page { get; set; }
+        public int PageSize { get; set; }
+    }
 }

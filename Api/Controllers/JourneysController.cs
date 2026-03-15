@@ -1,12 +1,13 @@
 ﻿using Application.Journeys.Commands;
+using Application.Journeys.Models;
 using Application.Journeys.Queries;
-using Domain.Entities;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
 
 namespace Api.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("api/journeys")]
     public class JourneysController : ControllerBase
@@ -18,27 +19,28 @@ namespace Api.Controllers
             _mediator = mediator;
         }
 
-        [HttpPost]
-        public async Task<IActionResult> Create([FromBody] CreateJourneyCommand command)
-        {
-            var id = await _mediator.Send(command);
-            return CreatedAtAction(nameof(GetById), new { id }, null);
-        }
-
         [HttpGet("{id}")]
-        public async Task<ActionResult<Journey>> GetById(int id)
+        public async Task<ActionResult<JourneyModel>> GetById(int id)
         {
-            var journey = await _mediator.Send(new GetJourneyByIdQuery(id));
+            var journey = await _mediator.Send(new GetJourneyByIdQuery { Id = id });
             if (journey == null) return NotFound();
             return Ok(journey);
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Journey>>> GetPaged([FromQuery] int page = 1, [FromQuery] int pageSize = 20)
+        public async Task<ActionResult<List<JourneyModel>>> GetPaged([FromQuery] int page = 1, [FromQuery] int pageSize = 20)
         {
             var userId = 2;
-            var journeys = await _mediator.Send(new GetJourneysPagedQuery(userId, page, pageSize));
-            return Ok(journeys);
+
+            var journeys = await _mediator.Send(new GetJourneysPagedQuery { UserId = userId, Page = page, PageSize = pageSize });
+            return Ok(journeys.ToList());
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Create([FromBody] CreateJourneyCommand command)
+        {
+            await _mediator.Send(command);
+            return NoContent();
         }
 
         [HttpPut("{id}")]
@@ -53,31 +55,29 @@ namespace Api.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
-            var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+            var userId = 2;
 
-            await _mediator.Send(new DeleteJourneyCommand(id, userId));
+            await _mediator.Send(new DeleteJourneyCommand { Id = id, UserId = userId });
             return NoContent();
         }
 
         [HttpPost("{id}/share")]
         public async Task<IActionResult> Share(int id, [FromBody] List<int> userIds)
         {
-            var userId = int.Parse(User.FindFirst("sub")!.Value);
+            var userId = 2;
 
-            var command = new ShareJourneyCommand
+            await _mediator.Send(new ShareJourneyCommand
             {
                 JourneyId = id,
                 SharedByUserId = userId,
                 UserIds = userIds
-            };
+            });
 
-            await _mediator.Send(command);
-
-            return Ok();
+            return NoContent();
         }
 
         [HttpPost("{id}/public-link")]
-        public async Task<IActionResult> CreatePublicLink(int id)
+        public async Task<IActionResult> PublicLink(int id)
         {
             var userId = int.Parse(User.FindFirst("sub")!.Value);
 
@@ -87,7 +87,35 @@ namespace Api.Controllers
                 UserId = userId
             });
 
-            return Ok(new { url });
+            return Ok(url);
+        }
+
+        [HttpPost("{id}/favorite")]
+        public async Task<IActionResult> AddFavorite(int id)
+        {
+            var userId = 2;
+
+            await _mediator.Send(new AddFavoriteCommand
+            {
+                JourneyId = id,
+                UserId = userId
+            });
+
+            return NoContent();
+        }
+
+        [HttpDelete("{id}/favorite")]
+        public async Task<IActionResult> RemoveFavorite(int id)
+        {
+            var userId = 2;
+
+            await _mediator.Send(new RemoveFavouriteCommand
+            {
+                JourneyId = id,
+                UserId = userId
+            });
+
+            return NoContent();
         }
     }
 }

@@ -1,7 +1,10 @@
-﻿using Domain.Entities;
+﻿using Application.Journeys.Models;
 using MediatR;
 
 namespace Application.Journeys.Queries
 {
-    public record GetJourneyByIdQuery(int Id) : IRequest<Journey?>;
+    public class GetJourneyByIdQuery() : IRequest<JourneyModel?>
+    {
+        public int Id { get; set; }
+    }
 }
