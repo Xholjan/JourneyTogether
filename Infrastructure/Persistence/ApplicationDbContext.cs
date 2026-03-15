@@ -9,6 +9,9 @@ namespace Persistence
 
         public DbSet<User> Users => Set<User>();
         public DbSet<Journey> Journeys => Set<Journey>();
+        public DbSet<Share> Shares => Set<Share>();
+        public DbSet<PublicLink> PublicLinks => Set<PublicLink>();
+        public DbSet<Audit> Audits => Set<Audit>();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -60,8 +63,44 @@ namespace Persistence
                 entity.HasOne(j => j.User)
                       .WithMany()
                       .HasForeignKey(j => j.UserId)
-                      .OnDelete(DeleteBehavior.Cascade);
+                      .OnDelete(DeleteBehavior.Restrict);
             });
+
+            modelBuilder.Entity<Share>()
+                .HasOne(s => s.Journey)
+                .WithMany()
+                .HasForeignKey(s => s.JourneyId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Share>()
+                .HasOne(s => s.SharedBy)
+                .WithMany()
+                .HasForeignKey(s => s.SharedByUserId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Share>()
+                .HasOne(s => s.SharedWith)
+                .WithMany()
+                .HasForeignKey(s => s.SharedWithUserId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<PublicLink>()
+                .HasOne(p => p.Journey)
+                .WithMany()
+                .HasForeignKey(p => p.JourneyId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Audit>()
+                .HasOne(a => a.Journey)
+                .WithMany()
+                .HasForeignKey(a => a.JourneyId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Audit>()
+                .HasOne(a => a.User)
+                .WithMany()
+                .HasForeignKey(a => a.UserId)
+                .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }

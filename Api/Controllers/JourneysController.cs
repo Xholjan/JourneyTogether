@@ -58,5 +58,36 @@ namespace Api.Controllers
             await _mediator.Send(new DeleteJourneyCommand(id, userId));
             return NoContent();
         }
+
+        [HttpPost("{id}/share")]
+        public async Task<IActionResult> Share(int id, [FromBody] List<int> userIds)
+        {
+            var userId = int.Parse(User.FindFirst("sub")!.Value);
+
+            var command = new ShareJourneyCommand
+            {
+                JourneyId = id,
+                SharedByUserId = userId,
+                UserIds = userIds
+            };
+
+            await _mediator.Send(command);
+
+            return Ok();
+        }
+
+        [HttpPost("{id}/public-link")]
+        public async Task<IActionResult> CreatePublicLink(int id)
+        {
+            var userId = int.Parse(User.FindFirst("sub")!.Value);
+
+            var url = await _mediator.Send(new CreatePublicLinkCommand
+            {
+                JourneyId = id,
+                UserId = userId
+            });
+
+            return Ok(new { url });
+        }
     }
 }

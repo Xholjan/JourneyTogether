@@ -1,8 +1,10 @@
 using Application.Common;
 using Application.Interfaces;
+using Application.Interfaces.Application.Interfaces;
 using Application.Journeys.Commands;
 using Application.Notifications;
 using FluentValidation;
+using Infrastructure.Persistence.Repositories.Persistence.Repositories;
 using MediatR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
@@ -67,6 +69,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJw
 // Repositories
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IJourneyRepository, JourneyRepository>();
+builder.Services.AddScoped<IShareRepository, ShareRepository>();
 
 // FluentValidation
 builder.Services.AddValidatorsFromAssemblyContaining<CreateJourneyCommandValidator>();
