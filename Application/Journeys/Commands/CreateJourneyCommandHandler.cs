@@ -6,12 +6,19 @@ namespace Application.Journeys.Commands
 {
     public class CreateJourneyCommandHandler : IRequestHandler<CreateJourneyCommand>
     {
-        private readonly IJourneyRepository _repo;
+        private readonly IJourneyRepository _journeyRepo;
+        private readonly IUserRepository _userRepo;
 
-        public CreateJourneyCommandHandler(IJourneyRepository repo) => _repo = repo;
+        public CreateJourneyCommandHandler(IJourneyRepository journeyRepo, IUserRepository userRepo)
+        {
+            _journeyRepo = journeyRepo;
+            _userRepo = userRepo;
+        }
 
         public async Task Handle(CreateJourneyCommand request, CancellationToken cancellationToken)
         {
+            var user = await _userRepo.GetByAuth0Id(request.UserId, cancellationToken);
+
             var journey = new Journey
             {
                 StartLocation = request.StartLocation,
@@ -20,10 +27,10 @@ namespace Application.Journeys.Commands
                 ArrivalTime = request.ArrivalTime,
                 TransportType = (TransportType)request.TransportType,
                 DistanceKm = request.DistanceKm,
-                UserId = request.UserId
+                UserId = user.Id
             };
 
-            await _repo.AddJourneyAsync(journey, cancellationToken);
+            await _journeyRepo.AddJourneyAsync(journey, cancellationToken);
         }
     }
 }

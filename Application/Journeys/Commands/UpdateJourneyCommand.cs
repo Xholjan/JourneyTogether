@@ -12,6 +12,6 @@ namespace Application.Journeys.Commands
         public DateTime ArrivalTime { get; set; }
         public TransportType TransportType { get; set; }
         public decimal DistanceKm { get; set; }
-        public int UserId { get; set; }
+        public string? UserId { get; set; }
     }
 }

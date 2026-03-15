@@ -23,9 +23,6 @@ namespace Application.Journeys.Commands
 
             RuleFor(x => x.DistanceKm)
                 .GreaterThan(0).WithMessage("Distance must be greater than zero");
-
-            RuleFor(x => x.UserId)
-                .NotEmpty().WithMessage("UserId is required");
         }
     }
 }

@@ -5,18 +5,25 @@ namespace Application.Journeys.Commands
 {
     public class DeleteJourneyCommandHandler : IRequestHandler<DeleteJourneyCommand>
     {
-        private readonly IJourneyRepository _repo;
+        private readonly IJourneyRepository _journeyRepo;
+        private readonly IUserRepository _userRepo;
 
-        public DeleteJourneyCommandHandler(IJourneyRepository repo) => _repo = repo;
+        public DeleteJourneyCommandHandler(IJourneyRepository journeyRepo, IUserRepository userRepo)
+        {
+            _journeyRepo = journeyRepo;
+            _userRepo = userRepo;
+        }
 
         public async Task Handle(DeleteJourneyCommand request, CancellationToken cancellationToken)
         {
-            var journey = await _repo.GetJourneyByIdAsync(request.Id, cancellationToken) ?? throw new KeyNotFoundException("Journey not found");
+            var user = await _userRepo.GetByAuth0Id(request.UserId, cancellationToken);
 
-            if (journey.UserId != request.UserId)
+            var journey = await _journeyRepo.GetJourneyByIdAsync(request.Id, cancellationToken) ?? throw new KeyNotFoundException("Journey not found");
+
+            if (journey.UserId != user.Id)
                 throw new UnauthorizedAccessException("You can only delete your own journeys");
 
-            await _repo.DeleteJourneyAsync(journey, cancellationToken);
+            await _journeyRepo.DeleteJourneyAsync(journey, cancellationToken);
         }
     }
 }

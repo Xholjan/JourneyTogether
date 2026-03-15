@@ -5,15 +5,22 @@ namespace Application.Journeys.Commands
 {
     public class UpdateJourneyCommandHandler : IRequestHandler<UpdateJourneyCommand>
     {
-        private readonly IJourneyRepository _repo;
+        private readonly IJourneyRepository _journeyRepo;
+        private readonly IUserRepository _userRepo;
 
-        public UpdateJourneyCommandHandler(IJourneyRepository repo) => _repo = repo;
+        public UpdateJourneyCommandHandler(IJourneyRepository journeyRepo, IUserRepository userRepo)
+        {
+            _journeyRepo = journeyRepo;
+            _userRepo = userRepo;
+        }
 
         public async Task Handle(UpdateJourneyCommand request, CancellationToken cancellationToken)
         {
-            var journey = await _repo.GetJourneyByIdAsync(request.Id, cancellationToken) ?? throw new KeyNotFoundException("Journey not found");
+            var user = await _userRepo.GetByAuth0Id(request.UserId, cancellationToken);
 
-            if (journey.UserId != request.UserId)
+            var journey = await _journeyRepo.GetJourneyByIdAsync(request.Id, cancellationToken) ?? throw new KeyNotFoundException("Journey not found");
+
+            if (journey.UserId != user.Id)
                 throw new UnauthorizedAccessException("You can only update your own journeys");
 
             journey.StartLocation = request.StartLocation;
@@ -23,7 +30,7 @@ namespace Application.Journeys.Commands
             journey.TransportType = (Domain.Entities.TransportType)request.TransportType;
             journey.DistanceKm = request.DistanceKm;
 
-            await _repo.UpdateJourneyAsync(journey, cancellationToken);
+            await _journeyRepo.UpdateJourneyAsync(journey, cancellationToken);
         }
     }
 }

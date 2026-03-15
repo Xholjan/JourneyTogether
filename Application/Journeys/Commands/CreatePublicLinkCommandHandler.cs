@@ -1,20 +1,25 @@
-﻿using Application.Interfaces.Application.Interfaces;
+﻿using Application.Interfaces;
+using Application.Interfaces.Application.Interfaces;
 using MediatR;
 
 namespace Application.Journeys.Commands
 {
     public class CreatePublicLinkCommandHandler : IRequestHandler<CreatePublicLinkCommand, string>
     {
-        private readonly IShareRepository _repo;
+        private readonly IShareRepository _shareRepo;
+        private readonly IUserRepository _userRepo;
 
-        public CreatePublicLinkCommandHandler(IShareRepository repo)
+        public CreatePublicLinkCommandHandler(IShareRepository shareRepo, IUserRepository userRepo)
         {
-            _repo = repo;
+            _shareRepo = shareRepo;
+            _userRepo = userRepo;
         }
 
         public async Task<string> Handle(CreatePublicLinkCommand request, CancellationToken cancellationToken)
         {
-            var token = await _repo.CreatePublicLinkAsync(request.JourneyId, request.UserId, cancellationToken);
+            var user = await _userRepo.GetByAuth0Id(request.UserId, cancellationToken);
+
+            var token = await _shareRepo.CreatePublicLinkAsync(request.JourneyId, user.Id, cancellationToken);
 
             return $"/public/journey/{token}";
         }

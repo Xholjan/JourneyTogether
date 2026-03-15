@@ -32,9 +32,18 @@ namespace Persistence.Repositories
         {
             await _context.SaveChangesAsync(cancellationToken);
         }
-        public async Task<User?> GetByAuth0Id(string auth0Id, CancellationToken cancellationToken)
+
+        public async Task<User> GetByAuth0Id(string? auth0Id, CancellationToken cancellationToken)
         {
-            return await _context.Users.FirstOrDefaultAsync(x => x.Auth0Id == auth0Id, cancellationToken);
+            if (auth0Id == null)
+                throw new Exception("User not found");
+
+            var user = await _context.Users.FirstOrDefaultAsync(x => x.Auth0Id == auth0Id, cancellationToken);
+
+            if (user == null)
+                throw new Exception("User not found");
+
+            return user;
         }
     }
 }

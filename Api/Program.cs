@@ -57,14 +57,15 @@ builder.Services.AddMediatR(cfg =>
 });
 
 // Auth0 Authentication
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options =>
+
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+}).AddJwtBearer(options =>
 {
     options.Authority = "https://dev-0lb0kkcpz1t58aql.us.auth0.com/";
     options.Audience = "https://api.journeytogether.com";
-    options.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
-    {
-        ValidateIssuer = true
-    };
 });
 
 // Repositories
