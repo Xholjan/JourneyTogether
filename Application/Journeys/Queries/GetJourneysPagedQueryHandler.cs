@@ -4,7 +4,7 @@ using MediatR;
 
 namespace Application.Journeys.Queries
 {
-    public class GetJourneysPagedQueryHandler : IRequestHandler<GetJourneysPagedQuery, IEnumerable<JourneyModel>>
+    public class GetJourneysPagedQueryHandler : IRequestHandler<GetJourneysPagedQuery, PagedModel<JourneyModel>>
     {
         private readonly IJourneyRepository _journeyRepo;
         private readonly IUserRepository _userRepo;
@@ -15,7 +15,7 @@ namespace Application.Journeys.Queries
             _userRepo = userRepo;
         }
 
-        public async Task<IEnumerable<JourneyModel>> Handle(GetJourneysPagedQuery request, CancellationToken cancellationToken)
+        public async Task<PagedModel<JourneyModel>> Handle(GetJourneysPagedQuery request, CancellationToken cancellationToken)
         {
             if (request.UserId == null)
                 throw new Exception("User not found");
@@ -26,7 +26,8 @@ namespace Application.Journeys.Queries
                 throw new Exception("User not found");
 
             var allJourneys = await _journeyRepo.GetJourneysAsync(user.Id, cancellationToken);
-            return allJourneys.Skip((request.Page - 1) * request.PageSize).Take(request.PageSize).Select(j => new JourneyModel
+
+            var result = allJourneys.Select(j => new JourneyModel
             {
                 Id = j.Id,
                 StartLocation = j.StartLocation,
@@ -36,6 +37,8 @@ namespace Application.Journeys.Queries
                 TransportType = (TransportType)j.TransportType,
                 DistanceKm = j.DistanceKm
             });
+
+            return new PagedModel<JourneyModel>(result, request.Page, request.PageSize);
         }
     }
 }

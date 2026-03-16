@@ -29,12 +29,12 @@ namespace Api.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<List<JourneyModel>>> GetPaged([FromQuery] int page = 1, [FromQuery] int pageSize = 20)
+        public async Task<ActionResult<PagedModel<JourneyModel>>> GetPaged([FromQuery] int page = 1, [FromQuery] int pageSize = 20)
         {
             var userId = User.UserAuth0Id();
 
             var journeys = await _mediator.Send(new GetJourneysPagedQuery(userId, page, pageSize));
-            return Ok(journeys.ToList());
+            return Ok(journeys);
         }
 
         [HttpPost]

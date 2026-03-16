@@ -4,9 +4,9 @@ namespace Application.Notifications
 {
     public class NotificationHub : Hub
     {
-        public async Task SendDailyGoalAchieved(int userId, string message)
+        public override async Task OnConnectedAsync()
         {
-            await Clients.User(userId.ToString()).SendAsync("DailyGoalAchieved", message);
+            await base.OnConnectedAsync();
         }
     }
 }

@@ -1,8 +1,6 @@
 ﻿using Application.Interfaces;
-using Application.Notifications;
 using Domain.Events;
 using MediatR;
-using Microsoft.AspNetCore.SignalR;
 
 namespace Application.Journeys.Events
 {
@@ -10,14 +8,12 @@ namespace Application.Journeys.Events
     {
         private readonly IJourneyRepository _repo;
         private readonly IMediator _mediator;
-        private readonly IHubContext<NotificationHub> _hubContext;
         private const decimal DAILY_GOAL_KM = 10;
 
-        public JourneyCreatedHandler(IJourneyRepository repo, IMediator mediator, IHubContext<NotificationHub> hubContext)
+        public JourneyCreatedHandler(IJourneyRepository repo, IMediator mediator)
         {
             _repo = repo;
             _mediator = mediator;
-            _hubContext = hubContext;
         }
 
         public async Task Handle(JourneyCreated notification, CancellationToken cancellationToken)
@@ -40,9 +36,6 @@ namespace Application.Journeys.Events
                 await _repo.UpdateJourneyAsync(journey, cancellationToken);
 
                 await _mediator.Publish(new DailyGoalAchieved(journey), cancellationToken);
-
-                await _hubContext.Clients.User(journey.UserId.ToString())
-                    .SendAsync("DailyGoalAchieved", new { journey.Id, journey.UserId, totalDistanceToday });
             }
         }
     }

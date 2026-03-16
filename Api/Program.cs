@@ -8,6 +8,7 @@ using Infrastructure.Persistence.Repositories;
 using Infrastructure.Persistence.Repositories.Persistence.Repositories;
 using MediatR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using Persistence;
@@ -48,6 +49,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 
 // SignalR
 builder.Services.AddSignalR();
+builder.Services.AddSingleton<IUserIdProvider, NameIdentifierUserIdProvider>();
 
 // MediatR
 builder.Services.AddMediatR(cfg =>
@@ -57,7 +59,6 @@ builder.Services.AddMediatR(cfg =>
 });
 
 // Auth0 Authentication
-
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -83,6 +84,34 @@ builder.Services.AddAuthorization();
 
 var app = builder.Build();
 
+app.UseExceptionHandler(errorApp =>
+{
+    errorApp.Run(async context =>
+    {
+        var exceptionHandlerPathFeature =
+            context.Features.Get<Microsoft.AspNetCore.Diagnostics.IExceptionHandlerPathFeature>();
+
+        var exception = exceptionHandlerPathFeature?.Error;
+
+        if (exception is ValidationException validationException)
+        {
+            context.Response.StatusCode = StatusCodes.Status400BadRequest;
+
+            var errors = validationException.Errors
+                .GroupBy(e => e.PropertyName)
+                .ToDictionary(
+                    g => g.Key,
+                    g => g.Select(e => e.ErrorMessage).ToArray()
+                );
+
+            await context.Response.WriteAsJsonAsync(new { errors });
+            return;
+        }
+
+        context.Response.StatusCode = StatusCodes.Status500InternalServerError;
+    });
+});
+
 // Swagger
 if (app.Environment.IsDevelopment())
 {
@@ -96,7 +125,7 @@ app.UseHttpsRedirection();
 app.UseCors("AllowNuxt");
 
 // SignalR
-app.MapHub<NotificationHub>("/notifications");
+app.MapHub<NotificationHub>("/notifications").RequireAuthorization();
 
 // Auth
 app.UseAuthentication();

@@ -3,7 +3,7 @@ using MediatR;
 
 namespace Application.Journeys.Queries
 {
-    public class GetJourneysPagedQuery : IRequest<IEnumerable<JourneyModel>>
+    public class GetJourneysPagedQuery : IRequest<PagedModel<JourneyModel>>
     {
         public string? UserId { get; set; } = string.Empty;
         public int Page { get; set; }
