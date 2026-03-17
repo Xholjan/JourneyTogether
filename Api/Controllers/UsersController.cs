@@ -1,4 +1,5 @@
-﻿using Application.Users.Commands;
+﻿using Api.Extensions;
+using Application.Users.Commands;
 using Application.Users.Queries;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -7,6 +8,7 @@ using System.Security.Claims;
 
 namespace Api.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("api/users")]
     public class UsersController : ControllerBase
@@ -21,7 +23,8 @@ namespace Api.Controllers
         [HttpGet]
         public async Task<IActionResult> Get()
         {
-            var result = await _mediator.Send(new GetUsersQuery());
+            var userId = User.UserAuth0Id();
+            var result = await _mediator.Send(new GetUsersQuery(userId));
             return Ok(result);
         }
 
@@ -29,10 +32,10 @@ namespace Api.Controllers
         [HttpPost("sync")]
         public async Task<IActionResult> SyncUser()
         {
-            var auth0Id = User.FindFirst("sub")?.Value;
+            var userId = User.UserAuth0Id();
             var email = User.FindFirst(ClaimTypes.Email)?.Value;
 
-            var result = await _mediator.Send(new SyncUserCommand(auth0Id!, email!));
+            var result = await _mediator.Send(new SyncUserCommand(userId!, email!));
 
             return Ok(result);
         }

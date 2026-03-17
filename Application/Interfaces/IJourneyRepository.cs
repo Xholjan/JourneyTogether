@@ -1,4 +1,5 @@
-﻿using Domain.Entities;
+﻿using Application.Journeys.Models;
+using Domain.Entities;
 
 namespace Application.Interfaces
 {
@@ -6,6 +7,7 @@ namespace Application.Interfaces
     {
         Task<IEnumerable<Journey>> GetJourneysAsync(int userId, CancellationToken cancellationToken);
         Task<Journey?> GetJourneyByIdAsync(int id, CancellationToken cancellationToken);
+        Task<JourneyModel?> GetJourneyWithFavouritesByIdAsync(int id, int userId, CancellationToken cancellationToken);
         Task AddJourneyAsync(Journey journey, CancellationToken cancellationToken);
         Task UpdateJourneyAsync(Journey journey, CancellationToken cancellationToken);
         Task DeleteJourneyAsync(Journey journey, CancellationToken cancellationToken);

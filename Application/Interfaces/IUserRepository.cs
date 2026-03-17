@@ -9,5 +9,6 @@ namespace Application.Interfaces
         Task AddUserAsync(User user, CancellationToken cancellationToken);
         Task SaveChangesAsync(CancellationToken cancellationToken);
         Task<User> GetByAuth0Id(string? auth0Id, CancellationToken cancellationToken);
+        Task<List<User>> GetUsersByIdsAsync(List<int> ids, CancellationToken cancellationToken);
     }
 }

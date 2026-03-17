@@ -1,5 +1,6 @@
 ﻿using Application.Interfaces.Application.Interfaces;
 using Domain.Entities;
+using Microsoft.EntityFrameworkCore;
 using Persistence;
 
 namespace Infrastructure.Persistence.Repositories
@@ -43,6 +44,12 @@ namespace Infrastructure.Persistence.Repositories
 
             public async Task<Guid> CreatePublicLinkAsync(int journeyId, int userId, CancellationToken cancellationToken)
             {
+                var existingLink = await _context.PublicLinks.Where(p => p.JourneyId == journeyId && !p.IsRevoked)
+                    .FirstOrDefaultAsync(cancellationToken);
+
+                if (existingLink != null)
+                    return existingLink.Token;
+
                 var token = Guid.NewGuid();
 
                 var link = new PublicLink
@@ -65,6 +72,16 @@ namespace Infrastructure.Persistence.Repositories
 
                 await _context.SaveChangesAsync(cancellationToken);
                 return token;
+            }
+
+            public async Task<Journey?> GetSharedJourneyByGuidAsync(Guid token, CancellationToken cancellationToken)
+            {
+                var link = await _context.PublicLinks
+                    .Include(p => p.Journey)
+                    .Where(p => p.Token == token && !p.IsRevoked)
+                    .FirstOrDefaultAsync(cancellationToken);
+
+                return link?.Journey;
             }
         }
     }

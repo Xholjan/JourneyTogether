@@ -9,5 +9,6 @@
         public DateTime ArrivalTime { get; set; }
         public TransportType TransportType { get; set; }
         public decimal DistanceKm { get; set; }
+        public bool IsFavourite { get; set; }
     }
 }

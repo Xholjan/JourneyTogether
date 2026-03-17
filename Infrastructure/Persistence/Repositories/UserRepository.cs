@@ -45,5 +45,11 @@ namespace Persistence.Repositories
 
             return user;
         }
+        public async Task<List<User>> GetUsersByIdsAsync(List<int> ids, CancellationToken cancellationToken)
+        {
+            return await _context.Users
+                .Where(u => ids.Contains(u.Id))
+                .ToListAsync(cancellationToken);
+        }
     }
 }

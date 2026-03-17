@@ -58,5 +58,13 @@ namespace Infrastructure.Persistence.Repositories
                 .Select(f => f.User)
                 .ToListAsync(cancellationToken);
         }
+
+        public async Task<List<int>> GetUserIdsByJourneyIdAsync(int journeyId, CancellationToken cancellationToken)
+        {
+            return await _context.Favourites
+                .Where(f => f.JourneyId == journeyId)
+                .Select(f => f.UserId)
+                .ToListAsync(cancellationToken);
+        }
     }
 }

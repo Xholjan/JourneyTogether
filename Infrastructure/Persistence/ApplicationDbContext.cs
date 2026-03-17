@@ -71,7 +71,7 @@ namespace Persistence
                 .HasOne(s => s.Journey)
                 .WithMany()
                 .HasForeignKey(s => s.JourneyId)
-                .OnDelete(DeleteBehavior.Restrict);
+                .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<Share>()
                 .HasOne(s => s.SharedBy)
@@ -89,13 +89,13 @@ namespace Persistence
                 .HasOne(p => p.Journey)
                 .WithMany()
                 .HasForeignKey(p => p.JourneyId)
-                .OnDelete(DeleteBehavior.Restrict);
+                .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<Audit>()
                 .HasOne(a => a.Journey)
                 .WithMany()
                 .HasForeignKey(a => a.JourneyId)
-                .OnDelete(DeleteBehavior.Restrict);
+                .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<Audit>()
                 .HasOne(a => a.User)
@@ -107,7 +107,7 @@ namespace Persistence
                 .HasOne(f => f.Journey)
                 .WithMany()
                 .HasForeignKey(f => f.JourneyId)
-                .OnDelete(DeleteBehavior.Restrict);
+                .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<Favourite>()
                 .HasOne(f => f.User)

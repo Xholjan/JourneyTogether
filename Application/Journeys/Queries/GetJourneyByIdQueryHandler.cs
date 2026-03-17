@@ -6,23 +6,19 @@ namespace Application.Journeys.Queries
 {
     public class GetJourneyByIdQueryHandler : IRequestHandler<GetJourneyByIdQuery, JourneyModel?>
     {
-        private readonly IJourneyRepository _repo;
-        public GetJourneyByIdQueryHandler(IJourneyRepository repo) => _repo = repo;
+        private readonly IJourneyRepository _journeyRepo;
+        private readonly IUserRepository _userRepo;
+        public GetJourneyByIdQueryHandler(IJourneyRepository journeyRepo, IUserRepository userRepo)
+        {
+            _journeyRepo = journeyRepo;
+            _userRepo = userRepo;
+        }
 
         public async Task<JourneyModel?> Handle(GetJourneyByIdQuery request, CancellationToken cancellationToken)
         {
-            var result = await _repo.GetJourneyByIdAsync(request.Id, cancellationToken);
+            var user = await _userRepo.GetByAuth0Id(request.UserId, cancellationToken);
 
-            return result is null ? null : new JourneyModel
-            {
-                Id = result.Id,
-                StartLocation = result.StartLocation,
-                StartTime = result.StartTime,
-                ArrivalLocation = result.ArrivalLocation,
-                ArrivalTime = result.ArrivalTime,
-                TransportType = (TransportType)result.TransportType,
-                DistanceKm = result.DistanceKm
-            };
+            return await _journeyRepo.GetJourneyWithFavouritesByIdAsync(request.Id, user.Id, cancellationToken);
         }
     }
 }

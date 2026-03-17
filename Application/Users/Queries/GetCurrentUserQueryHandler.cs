@@ -23,7 +23,9 @@ namespace Application.Users.Queries
             return new UserModel
             {
                 Id = user.Id,
-                Email = user.Email
+                Email = user.Email,
+                FirstName = user.FirstName,
+                LastName = user.LastName,
             };
         }
     }

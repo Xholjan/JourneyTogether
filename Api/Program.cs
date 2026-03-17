@@ -1,4 +1,5 @@
 using Application.Common;
+using Application.Exceptions;
 using Application.Interfaces;
 using Application.Interfaces.Application.Interfaces;
 using Application.Journeys.Commands;
@@ -6,6 +7,7 @@ using Application.Notifications;
 using FluentValidation;
 using Infrastructure.Persistence.Repositories;
 using Infrastructure.Persistence.Repositories.Persistence.Repositories;
+using Infrastructure.Services;
 using MediatR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.SignalR;
@@ -67,6 +69,28 @@ builder.Services.AddAuthentication(options =>
 {
     options.Authority = "https://dev-0lb0kkcpz1t58aql.us.auth0.com/";
     options.Audience = "https://api.journeytogether.com";
+    options.Events = new JwtBearerEvents
+    {
+        OnMessageReceived = context =>
+        {
+            var accessToken = context.Request.Query["access_token"];
+
+            var path = context.HttpContext.Request.Path;
+
+            if (!string.IsNullOrEmpty(accessToken) &&
+                path.StartsWithSegments("/notifications"))
+            {
+                context.Token = accessToken;
+            }
+
+            return Task.CompletedTask;
+        },
+        OnAuthenticationFailed = context =>
+        {
+            Console.WriteLine("Auth failed: " + context.Exception.Message);
+            return Task.CompletedTask;
+        }
+    };
 });
 
 // Repositories
@@ -74,6 +98,8 @@ builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IJourneyRepository, JourneyRepository>();
 builder.Services.AddScoped<IShareRepository, ShareRepository>();
 builder.Services.AddScoped<IFavouriteRepository, FavouriteRepository>();
+builder.Services.AddSingleton<IOnlineUserService, OnlineUserService>();
+builder.Services.AddScoped<IEmailService, EmailService>();
 
 // FluentValidation
 builder.Services.AddValidatorsFromAssemblyContaining<CreateJourneyCommandValidator>();
@@ -83,7 +109,6 @@ builder.Services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBeh
 builder.Services.AddAuthorization();
 
 var app = builder.Build();
-
 app.UseExceptionHandler(errorApp =>
 {
     errorApp.Run(async context =>
@@ -93,6 +118,21 @@ app.UseExceptionHandler(errorApp =>
 
         var exception = exceptionHandlerPathFeature?.Error;
 
+        // CustomException handling
+        if (exception is CustomException customException)
+        {
+            context.Response.StatusCode = StatusCodes.Status400BadRequest;
+
+            var errors = new Dictionary<string, string[]>
+            {
+                { "Error", new[] { customException.Message } }
+            };
+
+            await context.Response.WriteAsJsonAsync(new { errors });
+            return;
+        }
+
+        // FluentValidation
         if (exception is ValidationException validationException)
         {
             context.Response.StatusCode = StatusCodes.Status400BadRequest;

@@ -17,13 +17,7 @@ namespace Application.Journeys.Queries
 
         public async Task<PagedModel<JourneyModel>> Handle(GetJourneysPagedQuery request, CancellationToken cancellationToken)
         {
-            if (request.UserId == null)
-                throw new Exception("User not found");
-
             var user = await _userRepo.GetByAuth0Id(request.UserId, cancellationToken);
-
-            if (user == null)
-                throw new Exception("User not found");
 
             var allJourneys = await _journeyRepo.GetJourneysAsync(user.Id, cancellationToken);
 

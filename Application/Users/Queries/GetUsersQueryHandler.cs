@@ -1,21 +1,31 @@
 ﻿using Application.Interfaces;
-using Domain.Entities;
+using Application.Users.Models;
 using MediatR;
 
 namespace Application.Users.Queries
 {
-    public class GetUsersQueryHandler : IRequestHandler<GetUsersQuery, List<User>>
+    public class GetUsersQueryHandler : IRequestHandler<GetUsersQuery, List<UserModel>>
     {
-        private readonly IUserRepository _userRepository;
+        private readonly IUserRepository _userRepo;
 
-        public GetUsersQueryHandler(IUserRepository userRepository)
+        public GetUsersQueryHandler(IUserRepository userRepo)
         {
-            _userRepository = userRepository;
+            _userRepo = userRepo;
         }
 
-        public async Task<List<User>> Handle(GetUsersQuery request, CancellationToken cancellationToken)
+        public async Task<List<UserModel>> Handle(GetUsersQuery request, CancellationToken cancellationToken)
         {
-            return await _userRepository.GetAllUsersAsync(cancellationToken);
+            var user = await _userRepo.GetByAuth0Id(request.UserId, cancellationToken);
+
+            var users = await _userRepo.GetAllUsersAsync(cancellationToken);
+
+            return users.Where(u => u.Id != user.Id).Select(u => new UserModel
+            {
+                Id = u.Id,
+                Email = u.Email,
+                FirstName = u.FirstName,
+                LastName = u.LastName,
+            }).ToList();
         }
     }
 }

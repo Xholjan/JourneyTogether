@@ -1,4 +1,5 @@
-﻿using Application.Interfaces;
+﻿using Application.Exceptions;
+using Application.Interfaces;
 using MediatR;
 
 namespace Application.Journeys.Commands
@@ -21,7 +22,7 @@ namespace Application.Journeys.Commands
             var journey = await _journeyRepo.GetJourneyByIdAsync(request.Id, cancellationToken) ?? throw new KeyNotFoundException("Journey not found");
 
             if (journey.UserId != user.Id)
-                throw new UnauthorizedAccessException("You can only delete your own journeys");
+                throw new CustomException("You can only delete your own journeys");
 
             await _journeyRepo.DeleteJourneyAsync(journey, cancellationToken);
         }

@@ -23,7 +23,9 @@ namespace Api.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<JourneyModel>> GetById(int id)
         {
-            var journey = await _mediator.Send(new GetJourneyByIdQuery(id));
+            var userId = User.UserAuth0Id();
+
+            var journey = await _mediator.Send(new GetJourneyByIdQuery(id, userId));
             if (journey == null) return NotFound();
             return Ok(journey);
         }
@@ -86,7 +88,7 @@ namespace Api.Controllers
             return Ok(url);
         }
 
-        [HttpPost("{id}/favorite")]
+        [HttpPost("{id}/favourite")]
         public async Task<IActionResult> AddFavorite(int id)
         {
             var userId = User.UserAuth0Id();
@@ -95,7 +97,7 @@ namespace Api.Controllers
             return NoContent();
         }
 
-        [HttpDelete("{id}/favorite")]
+        [HttpDelete("{id}/favourite")]
         public async Task<IActionResult> RemoveFavorite(int id)
         {
             var userId = User.UserAuth0Id();

@@ -21,7 +21,7 @@ namespace Application.Journeys.Commands
 
             var token = await _shareRepo.CreatePublicLinkAsync(request.JourneyId, user.Id, cancellationToken);
 
-            return $"/public/journey/{token}";
+            return $"?pj={token}";
         }
     }
 }
