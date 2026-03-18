@@ -8,12 +8,18 @@ namespace Application.Journeys.Events
     {
         private readonly IJourneyRepository _repo;
         private readonly IMediator _mediator;
+        private readonly IMonthlyDistanceRepository _monthlyDistanceRepository;
+
         private const decimal DAILY_GOAL_KM = 10;
 
-        public JourneyCreatedHandler(IJourneyRepository repo, IMediator mediator)
+        public JourneyCreatedHandler(
+            IJourneyRepository repo,
+            IMediator mediator,
+            IMonthlyDistanceRepository monthlyDistanceRepository)
         {
             _repo = repo;
             _mediator = mediator;
+            _monthlyDistanceRepository = monthlyDistanceRepository;
         }
 
         public async Task Handle(JourneyCreated notification, CancellationToken cancellationToken)
@@ -24,6 +30,13 @@ namespace Application.Journeys.Events
                 .Where(j => j.StartTime.Date == DateTime.UtcNow.Date)
                 .ToList();
 
+            await _monthlyDistanceRepository.AddOrUpdateAsync(
+                journey.UserId,
+                journey.StartTime,
+                journey.DistanceKm,
+                cancellationToken
+            );
+
             var alreadyAchieved = todayJourneys.Any(j => j.IsDailyGoalAchieved);
             if (alreadyAchieved)
                 return;
@@ -33,7 +46,7 @@ namespace Application.Journeys.Events
             if (totalDistanceToday >= DAILY_GOAL_KM)
             {
                 journey.IsDailyGoalAchieved = true;
-                await _repo.UpdateJourneyAsync(journey, cancellationToken);
+                await _repo.UpdateJourneyAsync(journey, true, cancellationToken);
 
                 await _mediator.Publish(new DailyGoalAchieved(journey), cancellationToken);
             }

@@ -1,10 +1,10 @@
 ﻿using Api.Extensions;
 using Application.Users.Commands;
+using Application.Users.Models;
 using Application.Users.Queries;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
 
 namespace Api.Controllers
 {
@@ -28,15 +28,19 @@ namespace Api.Controllers
             return Ok(result);
         }
 
-        [Authorize]
         [HttpPost("sync")]
-        public async Task<IActionResult> SyncUser()
+        public async Task<ActionResult<UserStatus>> SyncUser()
         {
             var userId = User.UserAuth0Id();
-            var email = User.FindFirst(ClaimTypes.Email)?.Value;
 
-            var result = await _mediator.Send(new SyncUserCommand(userId!, email!));
+            var ns = "https://journeytogether.com/";
+            var email = User.FindFirst(ns + "email")?.Value ?? "";
+            var firstName = User.FindFirst(ns + "given_name")?.Value ?? "";
+            var lastName = User.FindFirst(ns + "family_name")?.Value ?? "";
+            var role = User.FindFirst(ns + "roles")?.Value ?? "User";
 
+            var command = new SyncUserCommand(userId, email, firstName, lastName, role);
+            var result = await _mediator.Send(command);
             return Ok(result);
         }
     }

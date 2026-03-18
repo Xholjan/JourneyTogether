@@ -1,4 +1,5 @@
-﻿using Application.Interfaces;
+﻿using Application.Exceptions;
+using Application.Interfaces;
 using Application.Users.Models;
 using MediatR;
 
@@ -18,7 +19,7 @@ namespace Application.Users.Queries
             var user = await _repo.GetByAuth0Id(request.Auth0Id, ct);
 
             if (user == null)
-                throw new Exception("User not found");
+                throw new CustomException("User not found");
 
             return new UserModel
             {

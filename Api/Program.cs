@@ -12,6 +12,7 @@ using MediatR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Persistence;
 using Persistence.Repositories;
@@ -65,20 +66,28 @@ builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
     options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-}).AddJwtBearer(options =>
+})
+.AddJwtBearer(options =>
 {
     options.Authority = "https://dev-0lb0kkcpz1t58aql.us.auth0.com/";
     options.Audience = "https://api.journeytogether.com";
+
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        NameClaimType = "sub",
+        RoleClaimType = "https://journeytogether.com/roles"
+    };
+
+    options.MapInboundClaims = true;
+
     options.Events = new JwtBearerEvents
     {
         OnMessageReceived = context =>
         {
             var accessToken = context.Request.Query["access_token"];
-
             var path = context.HttpContext.Request.Path;
 
-            if (!string.IsNullOrEmpty(accessToken) &&
-                path.StartsWithSegments("/notifications"))
+            if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/notifications"))
             {
                 context.Token = accessToken;
             }
@@ -98,6 +107,7 @@ builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IJourneyRepository, JourneyRepository>();
 builder.Services.AddScoped<IShareRepository, ShareRepository>();
 builder.Services.AddScoped<IFavouriteRepository, FavouriteRepository>();
+builder.Services.AddScoped<IMonthlyDistanceRepository, MonthlyDistanceRepository>();
 builder.Services.AddSingleton<IOnlineUserService, OnlineUserService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
 

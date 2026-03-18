@@ -31,7 +31,7 @@ namespace Application.Journeys.Commands
             journey.TransportType = (Domain.Entities.TransportType)request.TransportType;
             journey.DistanceKm = request.DistanceKm;
 
-            await _journeyRepo.UpdateJourneyAsync(journey, cancellationToken);
+            await _journeyRepo.UpdateJourneyAsync(journey, false, cancellationToken);
         }
     }
 }

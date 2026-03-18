@@ -13,24 +13,56 @@ namespace Application.Journeys.Events
         private readonly IHubContext<NotificationHub> _hubContext;
         private readonly IOnlineUserService _onlineUserService;
         private readonly IEmailService _emailService;
+        private readonly IMonthlyDistanceRepository _monthlyDistanceRepository;
 
         public JourneyUpdatedEventHandler(
             IFavouriteRepository favouriteRepository,
             IUserRepository userRepository,
             IHubContext<NotificationHub> hubContext,
             IOnlineUserService onlineUserService,
-            IEmailService emailService)
+            IEmailService emailService,
+            IMonthlyDistanceRepository monthlyDistanceRepository)
         {
             _favouriteRepository = favouriteRepository;
             _userRepository = userRepository;
             _hubContext = hubContext;
             _onlineUserService = onlineUserService;
             _emailService = emailService;
+            _monthlyDistanceRepository = monthlyDistanceRepository;
         }
 
         public async Task Handle(JourneyUpdated notification, CancellationToken cancellationToken)
         {
             var journey = notification.Journey;
+            var old = notification.OldJourney;
+
+            var sameBucket =
+                old.UserId == journey.UserId &&
+                old.StartTime.Year == journey.StartTime.Year &&
+                old.StartTime.Month == journey.StartTime.Month;
+
+            if (sameBucket)
+            {
+                var diff = journey.DistanceKm - old.DistanceKm;
+
+                if (diff != 0)
+                {
+                    await _monthlyDistanceRepository.AddOrUpdateAsync(
+                        journey.UserId,
+                        journey.StartTime,
+                        diff,
+                        cancellationToken
+                    );
+                }
+            }
+            else
+            {
+                await _monthlyDistanceRepository.MoveAsync(
+                    old.UserId, old.StartTime, old.DistanceKm,
+                    journey.UserId, journey.StartTime, journey.DistanceKm,
+                    cancellationToken
+                );
+            }
 
             var userIds = await _favouriteRepository
                 .GetUserIdsByJourneyIdAsync(journey.Id, cancellationToken);

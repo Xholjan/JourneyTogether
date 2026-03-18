@@ -13,6 +13,7 @@ namespace Persistence
         public DbSet<PublicLink> PublicLinks => Set<PublicLink>();
         public DbSet<Audit> Audits => Set<Audit>();
         public DbSet<Favourite> Favourites => Set<Favourite>();
+        public DbSet<MonthlyDistance> MonthlyDistances => Set<MonthlyDistance>();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -36,6 +37,12 @@ namespace Persistence
                 entity.HasIndex(e => e.Email)
                     .IsUnique();
             });
+
+            modelBuilder.Entity<User>()
+                .Property(u => u.Status)
+                .HasConversion<string>()
+                .HasMaxLength(20)
+                .IsRequired();
 
             modelBuilder.Entity<Journey>(entity =>
             {
@@ -92,12 +99,6 @@ namespace Persistence
                 .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<Audit>()
-                .HasOne(a => a.Journey)
-                .WithMany()
-                .HasForeignKey(a => a.JourneyId)
-                .OnDelete(DeleteBehavior.Cascade);
-
-            modelBuilder.Entity<Audit>()
                 .HasOne(a => a.User)
                 .WithMany()
                 .HasForeignKey(a => a.UserId)
@@ -117,6 +118,10 @@ namespace Persistence
 
             modelBuilder.Entity<Favourite>()
                 .HasIndex(f => new { f.JourneyId, f.UserId })
+                .IsUnique();
+
+            modelBuilder.Entity<MonthlyDistance>()
+                .HasIndex(x => new { x.UserId, x.Year, x.Month })
                 .IsUnique();
         }
     }

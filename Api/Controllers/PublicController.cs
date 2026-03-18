@@ -7,7 +7,7 @@ namespace Api.Controllers
 {
     [ApiController]
     [Route("api/public")]
-    public class PublicController : Controller
+    public class PublicController : ControllerBase
     {
         private readonly IMediator _mediator;
 

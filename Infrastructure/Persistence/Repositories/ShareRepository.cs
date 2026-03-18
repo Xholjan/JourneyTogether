@@ -32,9 +32,8 @@ namespace Infrastructure.Persistence.Repositories
 
                     _context.Audits.Add(new Audit
                     {
-                        JourneyId = journeyId,
                         UserId = sharedByUserId,
-                        Action = "Share",
+                        Action = "Shared journey with Id = " + journeyId,
                         CreatedAt = DateTime.UtcNow
                     });
                 }
@@ -64,9 +63,8 @@ namespace Infrastructure.Persistence.Repositories
 
                 _context.Audits.Add(new Audit
                 {
-                    JourneyId = journeyId,
                     UserId = userId,
-                    Action = "CreatePublicLink",
+                    Action = "Created public link for journey with Id = " + journeyId,
                     CreatedAt = DateTime.UtcNow
                 });
 

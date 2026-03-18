@@ -1,12 +1,11 @@
-﻿using Application.Interfaces;
-using Application.Users.Models;
+﻿using Application.Exceptions;
+using Application.Interfaces;
 using Domain.Entities;
 using MediatR;
 
 namespace Application.Users.Commands
 {
-
-    public class SyncUserCommandHandler : IRequestHandler<SyncUserCommand, UserModel>
+    public class SyncUserCommandHandler : IRequestHandler<SyncUserCommand, Models.UserStatus>
     {
         private readonly IUserRepository _userRepository;
 
@@ -15,27 +14,38 @@ namespace Application.Users.Commands
             _userRepository = userRepository;
         }
 
-        public async Task<UserModel> Handle(SyncUserCommand request, CancellationToken cancellationToken)
+        public async Task<Models.UserStatus> Handle(SyncUserCommand request, CancellationToken cancellationToken)
         {
-            var user = await _userRepository.GetByAuth0Id(request.Auth0Id, cancellationToken);
+            if (string.IsNullOrEmpty(request.Auth0Id))
+                throw new CustomException("Try login again.");
+
+            var user = await _userRepository.CheckAsync(request.Auth0Id, cancellationToken);
 
             if (user == null)
             {
                 user = new User
                 {
                     Auth0Id = request.Auth0Id,
-                    Email = request.Email
+                    Email = request.Email,
+                    FirstName = request.FirstName,
+                    LastName = request.LastName,
+                    Role = request.Role,
+                    Status = UserStatus.Active,
+                    CreatedAt = DateTime.UtcNow
                 };
 
                 await _userRepository.AddUserAsync(user, cancellationToken);
-                await _userRepository.SaveChangesAsync(cancellationToken);
+            }
+            else
+            {
+                user.Email = request.Email;
+                user.FirstName = request.FirstName;
+                user.LastName = request.LastName;
+                user.Role = request.Role;
+                await _userRepository.UpdateUserAsync(user.Id, user, cancellationToken);
             }
 
-            return new UserModel
-            {
-                Id = user.Id,
-                Email = user.Email
-            };
+            return (Models.UserStatus)user.Status;
         }
     }
 }

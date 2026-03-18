@@ -1,4 +1,5 @@
-﻿using Application.Interfaces;
+﻿using Application.Exceptions;
+using Application.Interfaces;
 using Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 
@@ -26,25 +27,42 @@ namespace Persistence.Repositories
         public async Task AddUserAsync(User user, CancellationToken cancellationToken)
         {
             await _context.Users.AddAsync(user, cancellationToken);
+            await _context.SaveChangesAsync(cancellationToken);
         }
 
-        public async Task SaveChangesAsync(CancellationToken cancellationToken)
+        public async Task UpdateUserAsync(int userId, User user, CancellationToken cancellationToken)
         {
+            _context.Audits.Add(new Audit
+            {
+                UserId = userId,
+                Action = "Updated user with Id = " + user.Id,
+                CreatedAt = DateTime.UtcNow
+            });
+
+            _context.Users.Update(user);
             await _context.SaveChangesAsync(cancellationToken);
         }
 
         public async Task<User> GetByAuth0Id(string? auth0Id, CancellationToken cancellationToken)
         {
             if (auth0Id == null)
-                throw new Exception("User not found");
+                throw new CustomException("User not found");
 
             var user = await _context.Users.FirstOrDefaultAsync(x => x.Auth0Id == auth0Id, cancellationToken);
 
             if (user == null)
-                throw new Exception("User not found");
+                throw new CustomException("User not found");
 
             return user;
         }
+
+        public async Task<User?> CheckAsync(string auth0Id, CancellationToken cancellationToken)
+        {
+            var user = await _context.Users.FirstOrDefaultAsync(x => x.Auth0Id == auth0Id, cancellationToken);
+
+            return user;
+        }
+
         public async Task<List<User>> GetUsersByIdsAsync(List<int> ids, CancellationToken cancellationToken)
         {
             return await _context.Users
