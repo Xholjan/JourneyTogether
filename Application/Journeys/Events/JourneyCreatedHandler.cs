@@ -10,7 +10,7 @@ namespace Application.Journeys.Events
         private readonly IMediator _mediator;
         private readonly IMonthlyDistanceRepository _monthlyDistanceRepository;
 
-        private const decimal DAILY_GOAL_KM = 10;
+        private const decimal DAILY_GOAL_KM = 20;
 
         public JourneyCreatedHandler(
             IJourneyRepository repo,
