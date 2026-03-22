@@ -27,7 +27,7 @@ namespace Application.Users.Commands
             var oldStatus = user.Status;
             user.Status = (Domain.Entities.UserStatus)request.NewStatus;
 
-            await _userRepository.UpdateUserAsync(loggedUser.Id, user, cancellationToken);
+            await _userRepository.UpdateUserAsync(loggedUser.Id, user, true, cancellationToken);
 
             await _mediator.Publish(new UserStatusChanged(user, oldStatus, (Domain.Entities.UserStatus)request.NewStatus), cancellationToken);
         }

@@ -42,7 +42,7 @@ namespace Application.Users.Commands
                 user.FirstName = request.FirstName;
                 user.LastName = request.LastName;
                 user.Role = request.Role;
-                await _userRepository.UpdateUserAsync(user.Id, user, cancellationToken);
+                await _userRepository.UpdateUserAsync(user.Id, user, false, cancellationToken);
             }
 
             return (Models.UserStatus)user.Status;

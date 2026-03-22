@@ -30,15 +30,17 @@ namespace Persistence.Repositories
             await _context.SaveChangesAsync(cancellationToken);
         }
 
-        public async Task UpdateUserAsync(int userId, User user, CancellationToken cancellationToken)
+        public async Task UpdateUserAsync(int userId, User user, bool audit, CancellationToken cancellationToken)
         {
-            _context.Audits.Add(new Audit
+            if (audit)
             {
-                UserId = userId,
-                Action = "Updated user with Id = " + user.Id,
-                CreatedAt = DateTime.UtcNow
-            });
-
+                _context.Audits.Add(new Audit
+                {
+                    UserId = userId,
+                    Action = "Updated user with Id = " + user.Id,
+                    CreatedAt = DateTime.UtcNow
+                });
+            }
             _context.Users.Update(user);
             await _context.SaveChangesAsync(cancellationToken);
         }

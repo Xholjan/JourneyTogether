@@ -1,5 +1,6 @@
 ﻿using Application.Exceptions;
 using Application.Interfaces;
+using Application.Interfaces.Application.Interfaces;
 using MediatR;
 
 namespace Application.Journeys.Commands
@@ -8,11 +9,13 @@ namespace Application.Journeys.Commands
     {
         private readonly IJourneyRepository _journeyRepo;
         private readonly IUserRepository _userRepo;
+        private readonly IShareRepository _shareRepo;
 
-        public DeleteJourneyCommandHandler(IJourneyRepository journeyRepo, IUserRepository userRepo)
+        public DeleteJourneyCommandHandler(IJourneyRepository journeyRepo, IUserRepository userRepo, IShareRepository shareRepo)
         {
             _journeyRepo = journeyRepo;
             _userRepo = userRepo;
+            _shareRepo = shareRepo;
         }
 
         public async Task Handle(DeleteJourneyCommand request, CancellationToken cancellationToken)
@@ -22,9 +25,18 @@ namespace Application.Journeys.Commands
             var journey = await _journeyRepo.GetJourneyByIdAsync(request.Id, cancellationToken) ?? throw new KeyNotFoundException("Journey not found");
 
             if (journey.UserId != user.Id)
-                throw new CustomException("You can only delete your own journeys");
+            {
+                var share = await _shareRepo.GetSharedJourneyAsync(request.Id, user.Id, cancellationToken);
 
-            await _journeyRepo.DeleteJourneyAsync(journey, cancellationToken);
+                if (share == null)
+                    throw new CustomException("You can only delete your own journeys");
+
+                await _shareRepo.DeleteSharedJourneyAsync(share.Id, user.Id, cancellationToken);
+            }
+            else
+            {
+                await _journeyRepo.DeleteJourneyAsync(journey, cancellationToken);
+            }
         }
     }
 }

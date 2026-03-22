@@ -142,6 +142,18 @@ app.UseExceptionHandler(errorApp =>
             return;
         }
 
+        if (exception is GoneException goneException)
+        {
+            context.Response.StatusCode = StatusCodes.Status410Gone;
+            var errors = new Dictionary<string, string[]>
+            {
+                { "Error", new[] { goneException.Message } }
+            };
+
+            await context.Response.WriteAsJsonAsync(new { errors });
+            return;
+        }
+
         // FluentValidation
         if (exception is ValidationException validationException)
         {
