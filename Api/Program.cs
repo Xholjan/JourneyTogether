@@ -1,7 +1,6 @@
 using Application.Common;
 using Application.Exceptions;
 using Application.Interfaces;
-using Application.Interfaces.Application.Interfaces;
 using Application.Journeys.Commands;
 using Application.Notifications;
 using FluentValidation;
@@ -195,5 +194,11 @@ app.UseAuthorization();
 
 // Controllers
 app.MapControllers();
+
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    db.Database.Migrate();
+}
 
 app.Run();

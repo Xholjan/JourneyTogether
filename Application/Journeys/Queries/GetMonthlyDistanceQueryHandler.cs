@@ -4,11 +4,11 @@ using MediatR;
 
 namespace Application.Journeys.Queries
 {
-    public class GetMonthlyDistanceHandler : IRequestHandler<GetMonthlyDistanceQuery, PagedModel<MonthlyDistanceModel>>
+    public class GetMonthlyDistanceQueryHandler : IRequestHandler<GetMonthlyDistanceQuery, PagedModel<MonthlyDistanceModel>>
     {
         private readonly IMonthlyDistanceRepository _repo;
 
-        public GetMonthlyDistanceHandler(IMonthlyDistanceRepository repo)
+        public GetMonthlyDistanceQueryHandler(IMonthlyDistanceRepository repo)
         {
             _repo = repo;
         }

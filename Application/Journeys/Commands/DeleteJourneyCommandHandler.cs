@@ -1,6 +1,5 @@
 ﻿using Application.Exceptions;
 using Application.Interfaces;
-using Application.Interfaces.Application.Interfaces;
 using MediatR;
 
 namespace Application.Journeys.Commands

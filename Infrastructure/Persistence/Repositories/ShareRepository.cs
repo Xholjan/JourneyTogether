@@ -1,5 +1,5 @@
 ﻿using Application.Exceptions;
-using Application.Interfaces.Application.Interfaces;
+using Application.Interfaces;
 using Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Persistence;
@@ -22,7 +22,7 @@ namespace Infrastructure.Persistence.Repositories
                 foreach (var userId in userIds)
                 {
                     var check = _context.Shares.AsNoTracking().Where(s => s.JourneyId == journeyId && s.SharedByUserId == sharedByUserId && s.SharedWithUserId == userId);
-                    if (check == null)
+                    if (!check.Any())
                     {
                         var share = new Share
                         {

@@ -1,10 +1,10 @@
-﻿using Application.Interfaces.Application.Interfaces;
+﻿using Application.Interfaces;
 using Application.Journeys.Models;
 using MediatR;
 
 namespace Application.Journeys.Queries
 {
-    internal class GetJourneyByPublicIdQueryHandler : IRequestHandler<GetJourneyByPublicIdQuery, JourneyModel?>
+    public class GetJourneyByPublicIdQueryHandler : IRequestHandler<GetJourneyByPublicIdQuery, JourneyModel?>
     {
         private readonly IShareRepository _shareRepo;
         public GetJourneyByPublicIdQueryHandler(IShareRepository shareRepo)
